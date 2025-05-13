@@ -22,8 +22,7 @@ else
   podman run -d --name devshell \
     -v "$dir/data/zsh_history:/root/.zsh_history" \
     -v "$dir/data:/root/data" \
-    -w /root \
-    -it devshell:latest
+    -it devshell:1.0.0
 fi
 
 # 3. Exec into the container
