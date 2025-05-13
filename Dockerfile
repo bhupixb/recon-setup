@@ -41,16 +41,9 @@ RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Install zsh, oh-my-zsh, powerlevel10k, completions, etc. using deluan/zsh-in-docker
-RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)"
-# Uses "Spaceship" theme with some customization. Uses some bundled plugins and installs some more from github
-# RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)" -- \
-    # -t https://github.com/denysdovhan/spaceship-prompt \
-    # -a 'SPACESHIP_PROMPT_ADD_NEWLINE="false"' \
-    # -a 'SPACESHIP_PROMPT_SEPARATE_LINE="false"' \
-    # -p git \
-    # -p ssh-agent \
-    # -p https://github.com/zsh-users/zsh-autosuggestions \
-    # -p https://github.com/zsh-users/zsh-completions
+RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)" -- \
+    -p https://github.com/zsh-users/zsh-autosuggestions \
+    -p https://github.com/zsh-users/zsh-completions
 
 # Set working directory
 WORKDIR /root
@@ -62,9 +55,6 @@ RUN touch $HOME/ok && touch /root/ok
 RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh 
 
 RUN ln -s $HOME/.atuin/bin/atuin /usr/local/bin/atuin && \
-    echo "Atuin installed at $(ls $HOME/.atuin/bin/atuin || echo "no")" && \
-    echo "Atuin installed at $(ls /root/.atuin/bin/atuin || echo "no 1")" && \
-    echo "Atuin installed at $(ls /usr/local/bin/atuin || echo "no 2")" && \
     echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
 
 # ENV PATH="/usr/local/go/bin:${PATH}"
