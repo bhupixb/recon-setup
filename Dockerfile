@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     dnsutils \
     netcat-openbsd \
     iputils-ping \
-    fzf \
     locales \
     sudo \
     python3 \
@@ -21,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
     build-essential \
+    tini \
     && ln -s $(which fdfind) /usr/local/bin/fd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -32,37 +32,32 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-
 # Install latest Go
 ENV GO_VERSION=1.24.0
 RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
-rm -rf /usr/local/go && \
-tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-rm go${GO_VERSION}.linux-amd64.tar.gz
+    rm -rf /usr/local/go && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+    rm go${GO_VERSION}.linux-amd64.tar.gz
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-# Install pipx (user mode)
-# RUN python3 -m pip install --no-cache-dir --upgrade pip && \
-#     python3 -m pip install --no-cache-dir pipx && \
-#     pipx ensurepath
-
-# Set up zsh config for root
-# RUN mkdir -p /root && \
-#     echo 'export HISTFILE=~/.zsh_history' > /root/.zshrc && \
-#     echo 'export HISTSIZE=30000' >> /root/.zshrc && \
-#     echo 'export SAVEHIST=30000' >> /root/.zshrc && \
-#     echo 'setopt append_history' >> /root/.zshrc && \
-#     echo 'setopt inc_append_history' >> /root/.zshrc && \
-#     echo 'setopt share_history' >> /root/.zshrc && \
-#     echo 'autoload -Uz compinit && compinit' >> /root/.zshrc && \
-#     echo 'source /usr/share/doc/fzf/examples/key-bindings.zsh' >> /root/.zshrc && \
-#     echo 'source /usr/share/doc/fzf/examples/completion.zsh' >> /root/.zshrc
+# Install zsh, oh-my-zsh, powerlevel10k, completions, etc. using deluan/zsh-in-docker
+# RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)"
+# Uses "Spaceship" theme with some customization. Uses some bundled plugins and installs some more from github
+RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)" -- \
+    # -t https://github.com/denysdovhan/spaceship-prompt \
+    # -a 'SPACESHIP_PROMPT_ADD_NEWLINE="false"' \
+    # -a 'SPACESHIP_PROMPT_SEPARATE_LINE="false"' \
+    # -p git \
+    # -p ssh-agent \
+    -p https://github.com/zsh-users/zsh-autosuggestions \
+    -p https://github.com/zsh-users/zsh-completions
 
 # Set working directory
 WORKDIR /root
 
 # Default shell
-SHELL ["/bin/bash", "-c"]
+SHELL ["/bin/zsh", "-c"]
 
-# # Entrypoint
-CMD ["bash"] 
+# Use tini for graceful shutdown
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["zsh"] 
