@@ -34,10 +34,10 @@ ENV LC_ALL=en_US.UTF-8
 
 # Install latest Go
 ENV GO_VERSION=1.24.0
-RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz && \
     rm -rf /usr/local/go && \
-    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-    rm go${GO_VERSION}.linux-amd64.tar.gz
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz && \
+    rm go${GO_VERSION}.linux-arm64.tar.gz
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Install zsh, oh-my-zsh, powerlevel10k, completions, etc. using deluan/zsh-in-docker
@@ -50,14 +50,18 @@ WORKDIR /root
 
 ENV HOME=/root
 
-RUN touch $HOME/ok && touch /root/ok
 # # Install Atuin
-RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh 
+# RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh 
 
-RUN ln -s $HOME/.atuin/bin/atuin /usr/local/bin/atuin && \
-    echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+# RUN ln -s $HOME/.atuin/bin/atuin /usr/local/bin/atuin && \
+#     echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
 
 # ENV PATH="/usr/local/go/bin:${PATH}"
+
+# install go stuff
+
+RUN go install github.com/ffuf/ffuf/v2@latest && go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+
 
 # Default shell
 SHELL ["/bin/zsh", "-c"]
